@@ -1,0 +1,49 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass2postgres
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+      - ./create_database.sql:/docker-entrypoint-initdb.d/init.sql
+    # ports:
+      # - "5432:5432"
+    networks:
+      - network
+    restart: unless-stopped
+
+  backend:
+    container_name: backend
+    build: ./backend
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: pass2postgres
+      DATABASE_DATABASE: chat
+    ports:
+      - "8002:8002"
+    networks:
+      - network
+    depends_on:
+      - postgres
+
+  frontend:
+    container_name: frontend
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - network
+    depends_on:
+      - backend
+
+networks:
+  network:
+    driver: bridge
+
+volumes:
+  postgres:
