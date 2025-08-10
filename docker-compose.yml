@@ -15,17 +15,33 @@ services:
       - network
     restart: unless-stopped
 
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@mail.com
+      PGADMIN_DEFAULT_PASSWORD: pass2admin
+      PGADMIN_LISTEN_PORT: 80
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - postgres
+    restart: unless-stopped
+
   backend:
     container_name: backend
     build: ./backend
     environment:
-      DATABASE_HOST: postgres
+      DATABASE_NAME: API
+      DATABASE_USER: API
+      DATABASE_PASS: 1793
+      DATABASE_HOST: 127.0.0.1
       DATABASE_PORT: 5432
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: pass2postgres
-      DATABASE_DATABASE: chat
-    ports:
-      - "8002:8002"
+    # ports:
+      # - "8002:8002"
     networks:
       - network
     depends_on:
@@ -47,3 +63,4 @@ networks:
 
 volumes:
   postgres:
+  pgadmin:
