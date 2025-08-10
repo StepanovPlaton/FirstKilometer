@@ -1,6 +1,3 @@
 [submodule "frontend"]
 	path = frontend
 	url = https://github.com/StepanovPlaton/FirstKilometerFrontend
-[submodule "backend"]
-	path = backend
-	url = https://github.com/Fluorouacil/AvtoApi
