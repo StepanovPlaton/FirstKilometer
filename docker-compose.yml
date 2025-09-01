@@ -1,6 +1,6 @@
 services:
   postgres:
-    container_name: postgres
+    container_name: firstkilometer_postgres
     image: postgres
     environment:
       POSTGRES_USER: postgres
@@ -8,15 +8,15 @@ services:
       PGDATA: /data/postgres
     volumes:
       - postgres:/data/postgres
-      - ./create_database.sql:/docker-entrypoint-initdb.d/init.sql
+      # - ./create_database.sql:/docker-entrypoint-initdb.d/init.sql
     # ports:
-      # - "5432:5432"
+    # - "5432:5432"
     networks:
-      - network
+      - backend
     restart: unless-stopped
 
   pgadmin:
-    container_name: pgadmin_container
+    container_name: firstkilometer_pgadmin
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@mail.com
@@ -26,39 +26,41 @@ services:
     volumes:
       - pgadmin:/var/lib/pgadmin
     ports:
-      - "5050:80"
+      - "5051:80"
     networks:
-      - postgres
+      - backend
     restart: unless-stopped
 
-  backend:
-    container_name: backend
-    build: ./backend
-    environment:
-      DATABASE_NAME: API
-      DATABASE_USER: API
-      DATABASE_PASS: 1793
-      DATABASE_HOST: 127.0.0.1
-      DATABASE_PORT: 5432
-    # ports:
-      # - "8002:8002"
-    networks:
-      - network
-    depends_on:
-      - postgres
+  # backend:
+  #   container_name: backend
+  #   build: ./backend
+  #   environment:
+  #     DATABASE_NAME: API
+  #     DATABASE_USER: API
+  #     DATABASE_PASS: 1793
+  #     DATABASE_HOST: 127.0.0.1
+  #     DATABASE_PORT: 5432
+  #   # ports:
+  #     # - "8002:8002"
+  #   networks:
+  #     - network
+  #   depends_on:
+  #     - postgres
 
   frontend:
-    container_name: frontend
+    container_name: firstkilometer_frontend
     build: ./frontend
     ports:
       - "3000:3000"
     networks:
-      - network
-    depends_on:
-      - backend
+      - frontend
+    # depends_on:
+    #   - backend
 
 networks:
-  network:
+  backend:
+    driver: bridge
+  frontend:
     driver: bridge
 
 volumes:
