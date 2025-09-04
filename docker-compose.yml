@@ -3,16 +3,15 @@ services:
     container_name: firstkilometer_postgres
     image: postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: pass2postgres
+      POSTGRES_USER: API_user
+      POSTGRES_PASSWORD: 123456789
+      POSTGRES_DB: API
       PGDATA: /data/postgres
     volumes:
       - postgres:/data/postgres
-      # - ./create_database.sql:/docker-entrypoint-initdb.d/init.sql
-    # ports:
-    # - "5432:5432"
+      - ./create_database.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - backend
+      - backend_net
     restart: unless-stopped
 
   pgadmin:
@@ -28,39 +27,50 @@ services:
     ports:
       - "5051:80"
     networks:
-      - backend
+      - backend_net
     restart: unless-stopped
 
-  # backend:
-  #   container_name: backend
-  #   build: ./backend
-  #   environment:
-  #     DATABASE_NAME: API
-  #     DATABASE_USER: API
-  #     DATABASE_PASS: 1793
-  #     DATABASE_HOST: 127.0.0.1
-  #     DATABASE_PORT: 5432
-  #   # ports:
-  #     # - "8002:8002"
-  #   networks:
-  #     - network
-  #   depends_on:
-  #     - postgres
+  backend:
+    container_name: firstkilometer_backend
+    build: ./backend
+    environment:
+      DATABASE_NAME: API
+      DATABASE_USER: API_user
+      DATABASE_PASS: 123456789
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      SITE_URL: http://backend:8000
+    networks:
+      - backend_net
+    depends_on:
+      - postgres
 
   frontend:
     container_name: firstkilometer_frontend
     build: ./frontend
-    ports:
-      - "3000:3000"
     networks:
+      - frontend_net
+    depends_on:
+      - backend
+
+  nginx:
+    container_name: firstkilometer_nginx
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - frontend_net
+      - backend_net
+    depends_on:
+      - backend
       - frontend
-    # depends_on:
-    #   - backend
 
 networks:
-  backend:
+  frontend_net:
     driver: bridge
-  frontend:
+  backend_net:
     driver: bridge
 
 volumes:
