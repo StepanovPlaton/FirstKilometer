@@ -46,6 +46,7 @@ services:
       - backend_net
     depends_on:
       - postgres
+    restart: unless-stopped
 
   frontend:
     container_name: firstkilometer_frontend
@@ -61,6 +62,7 @@ services:
       - frontend_net
     depends_on:
       - backend
+    restart: unless-stopped
 
   nginx:
     container_name: firstkilometer_nginx
@@ -75,6 +77,7 @@ services:
     depends_on:
       - backend
       - frontend
+    restart: unless-stopped
 
 networks:
   frontend_net:
