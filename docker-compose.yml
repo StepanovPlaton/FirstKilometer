@@ -24,8 +24,8 @@ services:
       PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
       - pgadmin:/var/lib/pgadmin
-    # ports:
-    #   - "5051:80"
+    ports:
+      - "5051:80"
     networks:
       - backend_net
     restart: unless-stopped
@@ -39,9 +39,16 @@ services:
       DATABASE_PASS: pass2databaseuser
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
-      SITE_URL: http://192.168.0.107:8005
+      SITE_URL: http://localhost:8005
+      DJANGO_SUPERUSER_USERNAME: admin
+      DJANGO_SUPERUSER_EMAIL: admin@mail.com
+      DJANGO_SUPERUSER_PASSWORD: pass2admin
     ports:
       - "8005:8000"
+    volumes:
+      - ./documents/templates:/app/services/doc_templates
+      - ./documents/media:/app/uploads/media
+      - ./documents/users:/app/uploads/documents
     networks:
       - backend_net
     depends_on:
@@ -50,13 +57,13 @@ services:
 
   frontend:
     container_name: firstkilometer_frontend
-    build: 
+    build:
       context: ./frontend
-      args: 
+      args:
         BACKEND_PROTOCOL: http
         BACKEND_DOMAIN: backend
         BACKEND_PORT: 8000
-        BASE_URL: http://192.168.0.107
+        BASE_URL: http://localhost
         API_PATTERN: api
     networks:
       - frontend_net

@@ -1,0 +1,5 @@
+documents/media/*
+documents/templates/*
+documents/users/*
+
+!**.keep
