@@ -1,7 +1,7 @@
 services:
   postgres:
     container_name: firstkilometer_postgres
-    image: postgres
+    build: ./database
     environment:
       POSTGRES_USER: firstkilometer_databaseuser
       POSTGRES_PASSWORD: pass2databaseuser
@@ -10,6 +10,8 @@ services:
     volumes:
       - postgres:/data/postgres
       - ./database/create_database.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/backups:/backup
+      - ./database/backups/log.txt:/var/log/cron.log
     networks:
       - backend_net
     restart: unless-stopped
@@ -39,7 +41,7 @@ services:
       DATABASE_PASS: pass2databaseuser
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
-      SITE_URL: http://localhost:8005
+      SITE_URL: http://localhost
       DJANGO_SUPERUSER_USERNAME: admin
       DJANGO_SUPERUSER_EMAIL: admin@mail.com
       DJANGO_SUPERUSER_PASSWORD: pass2admin
@@ -78,6 +80,8 @@ services:
       - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./documents/media:/documents/media
+      - ./documents/users:/documents/users
     networks:
       - frontend_net
       - backend_net
