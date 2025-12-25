@@ -3,3 +3,5 @@ documents/templates/*
 documents/users/*
 
 !**.keep
+
+database/create_database.sql
