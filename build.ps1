@@ -63,7 +63,7 @@ Remove-OldFiles -Pattern "$BackupDir\db_before_deploy_*.7z" -CurrentFile $DbBack
 
 # 5. ПЕРЕЗАПУСК DOCKER
 Write-Output ">>> Rebuilding and starting containers..." -ForegroundColor Yellow
-docker-compose up -d --build
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 # 6. ОЧИСТКА
 # docker image prune -f

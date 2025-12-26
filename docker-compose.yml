@@ -3,9 +3,9 @@ services:
     container_name: firstkilometer_postgres
     build: ./database
     environment:
-      POSTGRES_USER: firstkilometer_databaseuser
-      POSTGRES_PASSWORD: pass2databaseuser
-      POSTGRES_DB: firstkilometer
+      POSTGRES_USER: ${POSTGRES_USER:-firstkilometer_databaseuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pass2databaseuser}
+      POSTGRES_DB: ${POSTGRES_DB:-firstkilometer}
       PGDATA: /data/postgres
     volumes:
       - postgres:/data/postgres
@@ -20,14 +20,12 @@ services:
     container_name: firstkilometer_pgadmin
     image: dpage/pgadmin4
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@mail.com
-      PGADMIN_DEFAULT_PASSWORD: pass2admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@mail.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-pass2admin}
       PGADMIN_LISTEN_PORT: 2222
       PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
       - pgadmin:/var/lib/pgadmin
-    ports:
-      - "5051:2222"
     networks:
       - backend_net
     restart: unless-stopped
@@ -36,15 +34,15 @@ services:
     container_name: firstkilometer_backend
     build: ./backend
     environment:
-      DATABASE_NAME: firstkilometer
-      DATABASE_USER: firstkilometer_databaseuser
-      DATABASE_PASS: pass2databaseuser
+      DATABASE_NAME: ${POSTGRES_DB:-firstkilometer}
+      DATABASE_USER: ${POSTGRES_USER:-firstkilometer_databaseuser}
+      DATABASE_PASS: ${POSTGRES_PASSWORD:-pass2databaseuser}
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       SITE_URL: http://localhost:8080
-      DJANGO_SUPERUSER_USERNAME: admin
-      DJANGO_SUPERUSER_EMAIL: admin@mail.com
-      DJANGO_SUPERUSER_PASSWORD: pass2admin
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-admin}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-admin@mail.com}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-pass2admin}
     volumes:
       - ./documents/templates:/app/services/doc_templates
       - ./documents/media:/app/uploads/media
@@ -74,8 +72,6 @@ services:
   nginx:
     container_name: firstkilometer_nginx
     image: nginx:alpine
-    ports:
-      - "8080:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./documents/media:/documents/media
