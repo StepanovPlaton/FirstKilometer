@@ -38,9 +38,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
+          debug: true
           script: |
             cd FK
-            # На сервере тоже нужно обновить подмодули, если вы делаете git pull
-            git pull origin main
-            git submodule update --init --recursive
-            powershell ./build.ps1
+            powershell "./build.ps1 2>&1"
