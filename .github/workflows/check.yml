@@ -1,0 +1,148 @@
+name: Check sources
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  frontend_validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PRIVATE_REPOSITORIES_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+      - name: TypeScript type check
+        run: |
+          cd frontend
+          npm run types
+      - name: ESLint check
+        run: |
+          cd frontend
+          npm run eslint:check
+      - name: Prettier check
+        run: |
+          cd frontend
+          npm run format:check
+
+  backend_validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PRIVATE_REPOSITORIES_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install linting tools
+        run: |
+          pip install black flake8 isort
+      - name: Black check (code formatter)
+        run: |
+          cd backend
+          black --check --diff .
+      - name: isort check (import sorting)
+        run: |
+          cd backend
+          isort --check-only --diff .
+      - name: Flake8 (linter)
+        run: |
+          cd backend
+          flake8 . --max-line-length=120 --exclude=migrations,venv,__pycache__
+
+  vulnerability_validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PRIVATE_REPOSITORIES_TOKEN }}
+
+      - name: Create reports directory
+        run: mkdir -p security-reports
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "security-reports/trivy-results.sarif"
+          exit-code: "1"
+          severity: "CRITICAL,HIGH"
+          ignore-unfixed: false
+
+      - name: Run Trivy vulnerability scanner (table format)
+        uses: aquasecurity/trivy-action@master
+        continue-on-error: true
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
+          output: "security-reports/trivy-results.txt"
+          severity: "CRITICAL,HIGH"
+          ignore-unfixed: false
+
+      - name: Check Python dependencies with Safety
+        run: |
+          pip install safety
+          safety check --file backend/requirements.txt --output json > security-reports/safety-results.json || true
+          safety check --file backend/requirements.txt > security-reports/safety-results.txt || true
+
+      - name: Check npm dependencies
+        run: |
+          cd frontend
+          npm audit --audit-level=high --json > ../security-reports/npm-audit-results.json || true
+          npm audit --audit-level=high > ../security-reports/npm-audit-results.txt || true
+
+      - name: Create summary report
+        run: |
+          echo "# Security Scan Summary" > security-reports/SUMMARY.md
+          echo "" >> security-reports/SUMMARY.md
+          echo "**Scan Date:** $(date)" >> security-reports/SUMMARY.md
+          echo "**Commit:** ${{ github.sha }}" >> security-reports/SUMMARY.md
+          echo "**Branch:** ${{ github.ref }}" >> security-reports/SUMMARY.md
+          echo "" >> security-reports/SUMMARY.md
+          echo "## Reports Generated" >> security-reports/SUMMARY.md
+          echo "- Trivy SARIF: trivy-results.sarif" >> security-reports/SUMMARY.md
+          echo "- Trivy Table: trivy-results.txt" >> security-reports/SUMMARY.md
+          echo "- Safety JSON: safety-results.json" >> security-reports/SUMMARY.md
+          echo "- Safety Text: safety-results.txt" >> security-reports/SUMMARY.md
+          echo "- npm audit JSON: npm-audit-results.json" >> security-reports/SUMMARY.md
+          echo "- npm audit Text: npm-audit-results.txt" >> security-reports/SUMMARY.md
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports-${{ github.run_number }}-${{ github.sha }}
+          path: security-reports/
+          retention-days: 90
+          compression-level: 6
