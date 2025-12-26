@@ -41,4 +41,5 @@ jobs:
           debug: true
           script: |
             cd FK
-            powershell -ExecutionPolicy Bypass -File ./build.ps1
+            dir
+            powershell -ExecutionPolicy Bypass -Command "& {./build.ps1 | Out-String}"
