@@ -1,6 +1,6 @@
 [submodule "frontend"]
 	path = frontend
-	url = git@github:StepanovPlaton/FirstKilometerFrontend
+	url = git@github.com:StepanovPlaton/FirstKilometerFrontend
 [submodule "backend"]
 	path = backend
-	url = git@github:github.com/Fluorouacil/AvtoApi
+	url = git@github.com:Fluorouacil/AvtoApi
