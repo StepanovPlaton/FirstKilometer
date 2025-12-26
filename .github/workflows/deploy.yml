@@ -41,8 +41,13 @@ jobs:
           debug: true
           sync: true
           script: |
+            Write-Host "Current Identity: $(whoami)"
+            Write-Host "Current Directory: $(Get-Location)"
+
             cd FK
-            echo "Current directory content:"
-            dir
-            echo "Starting build script..."
-            powershell -ExecutionPolicy Bypass -File ./build.ps1
+
+            Write-Host "Directory content:"
+            Get-ChildItem
+
+            Write-Host "Starting build script..."
+            & ./build.ps1 *>&1
