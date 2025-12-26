@@ -39,7 +39,10 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           debug: true
+          sync: true
           script: |
             cd FK
+            echo "Current directory content:"
             dir
-            powershell -ExecutionPolicy Bypass -Command "& {./build.ps1 | Out-String}"
+            echo "Starting build script..."
+            powershell -ExecutionPolicy Bypass -File ./build.ps1
