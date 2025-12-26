@@ -2,7 +2,7 @@
 $ProjectPath = Get-Location # Предполагаем, что запуск из папки проекта
 $BackupDir = "$ProjectPath\backups_host"
 $DocumentsDir = "$ProjectPath\documents"
-$SevenZipPath = "7z" #"C:\Program Files\7-Zip\7z.exe"
+$SevenZipPath = "C:\Program Files\7-Zip\7z.exe"
 
 # Настройки БД (согласно вашему compose)
 $DB_Container = "firstkilometer_postgres"
