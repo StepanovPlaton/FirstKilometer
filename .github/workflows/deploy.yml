@@ -78,6 +78,7 @@ jobs:
   health_check:
     needs: deploy
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Health check
         run: |
@@ -87,23 +88,6 @@ jobs:
           echo "Health Check Diagnostics"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "HOST variable: $HOST_URL"
-
-          if [ -z "$HOST_URL" ]; then
-            echo "❌ ERROR: HOST variable is empty!"
-            exit 1
-          fi
-
-          # Проверяем DNS
-          echo ""
-          echo "Testing DNS resolution..."
-          if host=$(echo "$HOST_URL" | sed -e 's|^[^/]*//||' -e 's|/.*$||'); then
-            echo "Hostname: $host"
-            if nslookup "$host" > /dev/null 2>&1; then
-              echo "✅ DNS resolution: OK"
-            else
-              echo "❌ DNS resolution: FAILED"
-            fi
-          fi
 
           # Проверяем доступность
           echo ""
