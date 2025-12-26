@@ -85,67 +85,30 @@ jobs:
           submodules: recursive
           token: ${{ secrets.PRIVATE_REPOSITORIES_TOKEN }}
 
-      - name: Create reports directory
-        run: mkdir -p security-reports
-
       - name: Install Trivy
         uses: aquasecurity/trivy-action@master
         with:
           skip-setup-trivy: false
 
-      - name: Run Trivy vulnerability scanner (SARIF)
+      - name: Run Trivy scan
         run: |
-          trivy fs \
-            --skip-version-check \
-            --format sarif \
-            --output security-reports/trivy-results.sarif \
-            --severity CRITICAL,HIGH \
-            --exit-code 0 \
-            .
+          mkdir -p security-reports
+          trivy fs --skip-version-check --format table --output security-reports/trivy-results.txt --severity CRITICAL,HIGH --exit-code 0 --no-progress . || true
 
-      - name: Run Trivy vulnerability scanner (table format)
-        run: |
-          trivy fs \
-            --skip-version-check \
-            --format table \
-            --output security-reports/trivy-results.txt \
-            --severity CRITICAL,HIGH \
-            --exit-code 0 \
-            .
-
-      - name: Check Python dependencies with Safety
+      - name: Check Python dependencies
         run: |
           pip install safety
-          safety check --file backend/requirements.txt --output json > security-reports/safety-results.json || true
           safety check --file backend/requirements.txt > security-reports/safety-results.txt || true
 
       - name: Check npm dependencies
         run: |
           cd frontend
-          npm audit --audit-level=high --json > ../security-reports/npm-audit-results.json || true
           npm audit --audit-level=high > ../security-reports/npm-audit-results.txt || true
-
-      - name: Create summary report
-        run: |
-          echo "# Security Scan Summary" > security-reports/SUMMARY.md
-          echo "" >> security-reports/SUMMARY.md
-          echo "**Scan Date:** $(date)" >> security-reports/SUMMARY.md
-          echo "**Commit:** ${{ github.sha }}" >> security-reports/SUMMARY.md
-          echo "**Branch:** ${{ github.ref }}" >> security-reports/SUMMARY.md
-          echo "" >> security-reports/SUMMARY.md
-          echo "## Reports Generated" >> security-reports/SUMMARY.md
-          echo "- Trivy SARIF: trivy-results.sarif" >> security-reports/SUMMARY.md
-          echo "- Trivy Table: trivy-results.txt" >> security-reports/SUMMARY.md
-          echo "- Safety JSON: safety-results.json" >> security-reports/SUMMARY.md
-          echo "- Safety Text: safety-results.txt" >> security-reports/SUMMARY.md
-          echo "- npm audit JSON: npm-audit-results.json" >> security-reports/SUMMARY.md
-          echo "- npm audit Text: npm-audit-results.txt" >> security-reports/SUMMARY.md
 
       - name: Upload security reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: security-reports-${{ github.run_number }}-${{ github.sha }}
+          name: security-reports-${{ github.run_number }}
           path: security-reports/
-          retention-days: 90
-          compression-level: 6
+          retention-days: 30
