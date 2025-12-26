@@ -41,4 +41,4 @@ jobs:
           debug: true
           script: |
             cd FK
-            powershell "./build.ps1 2>&1"
+            powershell -ExecutionPolicy Bypass -File ./build.ps1
