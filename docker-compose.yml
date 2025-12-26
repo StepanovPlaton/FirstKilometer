@@ -39,7 +39,7 @@ services:
       DATABASE_PASS: ${POSTGRES_PASSWORD:-pass2databaseuser}
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
-      SITE_URL: http://localhost:8080
+      SITE_URL: ${HOST:-http://localhost}
       DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-admin}
       DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-admin@mail.com}
       DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-pass2admin}
@@ -61,7 +61,7 @@ services:
         BACKEND_PROTOCOL: http
         BACKEND_DOMAIN: backend
         BACKEND_PORT: 8000
-        BASE_URL: http://localhost:8080
+        BASE_URL: ${HOST:-http://localhost}
         API_PATTERN: api
     networks:
       - frontend_net
