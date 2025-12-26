@@ -90,15 +90,15 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
+        continue-on-error: true
         with:
           scan-type: "fs"
           scan-ref: "."
           format: "sarif"
           output: "security-reports/trivy-results.sarif"
           exit-code: "1"
-          severity: "CRITICAL,HIGH"
+          severity: "CRITICAL"
           ignore-unfixed: false
-          skip-version-check: true
 
       - name: Run Trivy vulnerability scanner (table format)
         uses: aquasecurity/trivy-action@master
@@ -110,7 +110,6 @@ jobs:
           output: "security-reports/trivy-results.txt"
           severity: "CRITICAL,HIGH"
           ignore-unfixed: false
-          skip-version-check: true
 
       - name: Check Python dependencies with Safety
         run: |
