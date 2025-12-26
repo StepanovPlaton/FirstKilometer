@@ -3,13 +3,13 @@ services:
     container_name: firstkilometer_postgres
     image: postgres
     environment:
-      POSTGRES_USER: API_user
-      POSTGRES_PASSWORD: 123456789
-      POSTGRES_DB: API
+      POSTGRES_USER: firstkilometer_databaseuser
+      POSTGRES_PASSWORD: pass2databaseuser
+      POSTGRES_DB: firstkilometer
       PGDATA: /data/postgres
     volumes:
       - postgres:/data/postgres
-      - ./create_database.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/create_database.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - backend_net
     restart: unless-stopped
@@ -24,8 +24,8 @@ services:
       PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
       - pgadmin:/var/lib/pgadmin
-    ports:
-      - "5051:80"
+    # ports:
+    #   - "5051:80"
     networks:
       - backend_net
     restart: unless-stopped
@@ -34,12 +34,14 @@ services:
     container_name: firstkilometer_backend
     build: ./backend
     environment:
-      DATABASE_NAME: API
-      DATABASE_USER: API_user
-      DATABASE_PASS: 123456789
+      DATABASE_NAME: firstkilometer
+      DATABASE_USER: firstkilometer_databaseuser
+      DATABASE_PASS: pass2databaseuser
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
-      SITE_URL: http://backend:8000
+      SITE_URL: http://192.168.0.107:8005
+    ports:
+      - "8005:8000"
     networks:
       - backend_net
     depends_on:
@@ -47,7 +49,14 @@ services:
 
   frontend:
     container_name: firstkilometer_frontend
-    build: ./frontend
+    build: 
+      context: ./frontend
+      args: 
+        BACKEND_PROTOCOL: http
+        BACKEND_DOMAIN: backend
+        BACKEND_PORT: 8000
+        BASE_URL: http://192.168.0.107
+        API_PATTERN: api
     networks:
       - frontend_net
     depends_on:

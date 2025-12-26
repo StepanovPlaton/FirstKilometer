@@ -1,0 +1,21 @@
+-- CREATE DATABASE firstkilometer;
+
+-- \c firstkilometer
+
+-- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- CREATE USER "user" WITH PASSWORD 'password';
+
+-- GRANT ALL PRIVILEGES ON DATABASE firstkilometer TO "user";
+
+-- GRANT ALL PRIVILEGES ON SCHEMA public TO "user";
+
+-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO "user";
+-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO "user";
+-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO "user";
+-- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TYPES TO "user";
+
+-- GRANT CONNECT ON DATABASE firstkilometer TO "user";
+-- GRANT TEMPORARY ON DATABASE firstkilometer TO "user";
+
+-- RAISE NOTICE 'База данных инициализированна';
