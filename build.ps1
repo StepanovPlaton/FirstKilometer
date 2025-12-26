@@ -38,19 +38,28 @@ $DocBackupName = "docs_backup_$Timestamp.7z"
 # 4. РОТАЦИЯ БЭКАПОВ (Оставляем только 2 последних для каждого типа)
 Write-Output ">>> Rotating old backups..." -ForegroundColor Yellow
 
-# Ротация для документов
-$OldDocBackups = Get-ChildItem "$BackupDir\docs_backup_*.7z" | Sort-Object CreationTime -Descending | Select-Object -Skip 2
-foreach ($file in $OldDocBackups) {
-    Remove-Item $file.FullName -Force
-    Write-Output "Removed old docs backup: $($file.Name)" -ForegroundColor Gray
+# Функция для безопасного удаления
+function Remove-OldFiles {
+    param([string]$Pattern, [string]$CurrentFile)
+    
+    # Получаем все файлы по маске, исключаем текущий (только что созданный), 
+    # сортируем по ИМЕНИ (потому что там дата) и пропускаем 2 самых свежих.
+    $FilesToDelete = Get-ChildItem $Pattern | 
+                     Where-Object { $_.Name -ne $CurrentFile } | 
+                     Sort-Object Name -Descending | 
+                     Select-Object -Skip 2
+
+    foreach ($file in $FilesToDelete) {
+        Remove-Item $file.FullName -Force
+        Write-Output "Removed old backup: $($file.Name)" -ForegroundColor Gray
+    }
 }
 
-# Ротация для базы данных (SQL)
-$OldDbBackups = Get-ChildItem "$BackupDir\db_before_deploy_*.7z" | Sort-Object CreationTime -Descending | Select-Object -Skip 2
-foreach ($file in $OldDbBackups) {
-    Remove-Item $file.FullName -Force
-    Write-Output "Removed old DB backup: $($file.Name)" -ForegroundColor Gray
-}
+# Ротация для документов
+Remove-OldFiles -Pattern "$BackupDir\docs_backup_*.7z" -CurrentFile $DocBackupName
+
+# Ротация для базы данных
+Remove-OldFiles -Pattern "$BackupDir\db_before_deploy_*.7z" -CurrentFile $DbBackupName
 
 # 5. ПЕРЕЗАПУСК DOCKER
 Write-Output ">>> Rebuilding and starting containers..." -ForegroundColor Yellow
