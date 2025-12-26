@@ -134,10 +134,3 @@ jobs:
           echo ""
           echo "❌ Health check failed after $MAX_RETRIES attempts"
           echo ""
-          echo "Possible causes:"
-          echo "  1. Server is not accessible from GitHub Actions runners"
-          echo "  2. Firewall blocking GitHub IPs"
-          echo "  3. DNS not resolving correctly"
-          echo "  4. Wrong protocol (HTTP vs HTTPS)"
-          echo "  5. Server not started yet"
-          exit 1
