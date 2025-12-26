@@ -21,6 +21,7 @@ jobs:
         uses: docker/bake-action@v5
         with:
           files: docker-compose.yml
+          targets: backend,frontend
           push: false
           set: |
             *.cache-from=type=gha
@@ -185,7 +186,7 @@ jobs:
 
       - name: Health check
         run: |
-          MAX_RETRIES=5
+          MAX_RETRIES=10
           RETRY_COUNT=0
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if curl -f ${{ vars.HOST }} 2>/dev/null; then
