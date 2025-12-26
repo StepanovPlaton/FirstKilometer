@@ -1,0 +1,25 @@
+services:
+  nginx:
+    networks:
+      - cloudpub_net
+
+  cloudpub:
+    image: cloudpub/cloudpub:latest
+    restart: unless-stopped
+    environment:
+      - TOKEN=${CLOUDPUB_TOKEN:?}
+      - HTTP=nginx:80,pgadmin=2222
+    command: run
+    depends_on:
+      - nginx
+    volumes:
+      - cloudpub-config:/home/cloudpub
+    networks:
+      - cloudpub_net
+
+networks:
+  cloudpub_net:
+    driver: bridge
+
+volumes:
+  cloudpub-config:
