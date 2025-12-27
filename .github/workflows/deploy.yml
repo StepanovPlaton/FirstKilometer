@@ -5,7 +5,7 @@ on:
     branches: ["main"]
 
 jobs:
-  build_and_test:
+  build_backend:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -17,18 +17,40 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker images with Bake
+      - name: Build Backend Docker image
         uses: docker/bake-action@v5
         with:
           files: docker-compose.yml
-          targets: backend,frontend
+          targets: backend
+          push: false
+          set: |
+            *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
+
+  build_frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PRIVATE_REPOSITORIES_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Frontend Docker image
+        uses: docker/bake-action@v5
+        with:
+          files: docker-compose.yml
+          targets: frontend
           push: false
           set: |
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
 
   deploy:
-    needs: build_and_test
+    needs: [build_backend, build_frontend]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     environment: production
@@ -84,12 +106,6 @@ jobs:
         run: |
           HOST_URL="${{ vars.HOST }}"
 
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "Health Check Diagnostics"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "HOST variable: $HOST_URL"
-
-          # Проверяем доступность
           echo ""
           echo "Testing connectivity..."
           MAX_RETRIES=25
@@ -105,11 +121,6 @@ jobs:
               exit 0
             fi
             
-            # Если код 000, показываем детальную ошибку
-            if [ "$HTTP_CODE" == "000" ]; then
-              echo "  ⚠️  Connection failed. Testing with verbose output..."
-              curl -v --max-time 5 --connect-timeout 3 "$HOST_URL" 2>&1 | head -20 || true
-            fi
             
             RETRY_COUNT=$((RETRY_COUNT+1))
             sleep 10
