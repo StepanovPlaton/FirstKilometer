@@ -4,10 +4,21 @@ $BackupDir = "$ProjectPath\deploy_backups"
 $DocumentsDir = "$ProjectPath\documents"
 $SevenZipPath = "C:\Program Files\7-Zip\7z.exe"
 
-# Настройки БД
-$DB_Container = "firstkilometer_postgres"
-$DB_User = "firstkilometer_databaseuser"
-$DB_Name = "firstkilometer"
+$DB_CONTAINER = "firstkilometer_postgres"
+
+$envFile = ".\.env"
+if (Test-Path $envFile) {
+    Get-Content $envFile | Where-Object {
+        $_ -notmatch "^\s*#" -and $_ -match "\S"  # Пропускаем комментарии и пустые строки
+    } | ForEach-Object {
+        $name, $value = $_ -split '=', 2
+        $varName = $name.Trim()
+        $varValue = $value.Trim() -replace '^"(.*)"$', '$1' -replace "^'(.*)'$", '$1'  # убираем кавычки
+        Set-Variable -Name $varName -Value $varValue -Scope Script
+    }
+} else {
+    Write-Warning "Файл .env не найден."
+}
 
 # Создаем папку для бэкапов, если нет
 if (!(Test-Path $BackupDir)) { New-Item -ItemType Directory -Path $BackupDir }
@@ -26,7 +37,7 @@ Write-Output ">>> Creating Database backup..." -ForegroundColor Yellow
 $DbBackupName = "db_before_deploy_$Timestamp.7z"
 
 # Делаем дамп и сжимаем
-docker exec $DB_Container pg_dump -U $DB_User $DB_Name > "$BackupDir\temp_db.sql"
+docker exec $DB_Container pg_dump -U $POSTGRES_USER $POSTGRES_DB > "$BackupDir\temp_db.sql"
 & $SevenZipPath a -mx=9 -m0=lzma2 "$BackupDir\$DbBackupName" "$BackupDir\temp_db.sql"
 Remove-Item "$BackupDir\temp_db.sql"
 
