@@ -24,8 +24,8 @@ jobs:
           targets: backend
           push: false
           set: |
-            *.cache-from=type=gha
-            *.cache-to=type=gha,mode=max
+            *.cache-from=type=gha,scope=backend
+            *.cache-to=type=gha,mode=max,scope=backend
 
   build_frontend:
     runs-on: ubuntu-latest
@@ -46,8 +46,8 @@ jobs:
           targets: frontend
           push: false
           set: |
-            *.cache-from=type=gha
-            *.cache-to=type=gha,mode=max
+            *.cache-from=type=gha,scope=frontend
+            *.cache-to=type=gha,mode=max,scope=frontend
 
   deploy:
     needs: [build_backend, build_frontend]
