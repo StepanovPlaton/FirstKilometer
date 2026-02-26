@@ -6,3 +6,4 @@ deploy_backups/*
 !**.keep
 
 database/create_database.sql
+database/backups/*
