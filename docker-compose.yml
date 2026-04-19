@@ -43,6 +43,7 @@ services:
       DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-admin}
       DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-admin@mail.com}
       DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-pass2admin}
+      PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK: True
     volumes:
       - ./documents/templates:/app/services/doc_templates
       - ./documents/media:/app/uploads/media
