@@ -48,6 +48,7 @@ services:
       - ./documents/templates:/app/services/doc_templates
       - ./documents/media:/app/uploads/media
       - ./documents/users:/app/uploads/documents
+      - backend_logs:/app/logs
     networks:
       - backend_net
     depends_on:
@@ -94,3 +95,4 @@ networks:
 volumes:
   postgres:
   pgadmin:
+  backend_logs:
