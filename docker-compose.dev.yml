@@ -2,6 +2,3 @@ services:
   nginx:
     ports:
       - "80:80"
-  pgadmin:
-    ports:
-      - "5051:2222"
